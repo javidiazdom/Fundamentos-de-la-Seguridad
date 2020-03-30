@@ -374,3 +374,49 @@ Se comprueba que, efectivamente, los valores generados son equivalentes
 ```bash
 $ cmp secret1 secret2
 ```
+
+## Cifrado asimétrico de documentos
+
+En esta parte de la práctica se pide cifrar un documento de texto y enviarlo a un compañero junto con la clave cifrada con su clave pública RSA. 
+Para cumplir la especificación, se crea el fichero de texto `mensaje.txt` y se cifra utilizando `aes-256`.
+
+```bash
+$ openssl enc -aes-256-cfb -in mensaje.txt -out mensaje.aes-256-cfb
+```
+
+El siguiente paso es cifrar la contraseña con la clave pública de mi compañero (Néstor Pérez Haro)
+
+```
+$ openssl pkeyutl -pubin -encrypt -in contraseña -out contraseña.cif -inkey clavepublicanes.pem
+```
+
+y por último firmar el resumen del archivo de texto con mi clave privada
+```bash
+$ openssl dgst -sha256 -sign myprivatekey.pem -out resumen-mensaje-firmado.sha256 mensaje.txt
+```
+
+Con estos tres archivos se puede enviar un mensaje cifrado que cumple con los principios de la seguridad en la comunicación: confidencialidad, integridad, autenticación y no repudio.
+
+Así mismo, los archivos que he obtenido del intercambio de mensajes son los siguientes:
+
+- `archivoaes-nes`, cifrado mediante aes-256-cbc
+
+- `contra-nes.cif`, que es la contraseña del cifrado simétrico del arhivo anteriorç
+  
+- `firmanes.rsa`, que es el resumen firmado del documento cifrado.
+
+Con estos datos es posible lo siguiente
+
+  * Descifrar la contraseña simétrica contenida en `contra-nes.cif` utilizando mi clave privada
+
+    ```bash
+    $ openssl pkeyutl -decrypt -in contra-nes.cif -out contra-nes.txt -inkey myprivatekey.pem
+    ```
+  * Luego de esto, se utiliza la contraseña obtenida para descifrar el archivo `archivoaes`
+    ```bash
+    $ openssl enc -aes-256-cbc -d -in archivoaes-nes -out mensaje-nestor.txt -kfile contra-nes.txt
+    ```
+  * Por último debemos verificar la autenticidad del emisor con su firma
+    ```
+    $ openssl dgst -md5 -verify clavepublicanes.pem -signature firmanes.rsa mensaje.txt
+    ```
