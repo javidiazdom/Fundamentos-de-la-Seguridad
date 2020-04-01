@@ -138,9 +138,9 @@ Salted__qh��ٗ
 
 ### Gestión de contraseñas
 
-PKCS (Public Key Cryptography Standard) es un grupo de **estándares** de utilización de técnicas criptográficas en la gestión de claves públicas en algoritmos criptográficos. Concretamente openssl nos permite utilizar `pbkdf1` y `pbkdf2`, que son implementaciones de PKCS. La principal diferencia entre ambos es que `pbkdf1` no es capaz de generar claves de más de 160 bits, mientras que `pbkdf2` lo hace de 128, 256 y 512 bits.
+>PKCS (Public Key Cryptography Standard) es un grupo de **estándares** de utilización de técnicas criptográficas en la gestión de claves públicas en algoritmos criptográficos. Concretamente openssl nos permite utilizar `pbkdf1` y `pbkdf2`, que son implementaciones de PKCS. La principal diferencia entre ambos es que `pbkdf1` no es capaz de generar claves de más de 160 bits, mientras que `pbkdf2` lo hace de 128, 256 y 512 bits.
 
-El algoritmo funciona aplicando una función pseudoaleatoria (HMAC con una función hash aprobada) a la contraseña de entrada junto con un valor de sal, repitiendo este proceso muchas veces (mínimo 1000 iteraciones) produciendo una clave derivada. Ésta se puede utilizar como una clave criptográfica en operaciones posteriores. También se puede utilizar la salida de este algoritmo para rellenar el vector de inicialización. El uso de la sal en la gestión de la contraseña permite que para una misma contraseña se generen diferentes claves criptográficas.
+>El algoritmo funciona aplicando una función pseudoaleatoria (HMAC con una función hash aprobada) a la contraseña de entrada junto con un valor de sal, repitiendo este proceso muchas veces (mínimo 1000 iteraciones) produciendo una clave derivada. Ésta se puede utilizar como una clave criptográfica en operaciones posteriores. También se puede utilizar la salida de este algoritmo para rellenar el vector de inicialización. El uso de la sal en la gestión de la contraseña permite que para una misma contraseña se generen diferentes claves criptográficas.
 
 ### Descifrado de un fichero con clave, vector y sal.
 
@@ -420,3 +420,240 @@ Con estos datos es posible lo siguiente
     ```
     $ openssl dgst -md5 -verify clavepublicanes.pem -signature firmanes.rsa mensaje.txt
     ```
+
+## Envío, recepción y decodificación manual de mensajes S/MIME firmados y cifrados, empleando certificados creados por el estudiante y firmados con el certificado raíz de prácticas de la asignatura.
+
+Para empezar se crea la clave privada personal. Esta clave se utilizará para crear el certificado personal posteriormente. Como clave utilizamos `unacontraseña`.
+
+```bash
+$ openssl genpkey -algorithm RSA -aes256 -out certificadoPersonal.key -pkeyopt rsa_keygen_bits:2048
+```
+
+A continuación se genera el susodicho certificado introduciendo la información que se solicita
+
+```bash
+$ openssl req -new -key certificadoPersonal.key -out certificadoPersonal.csr 
+Enter pass phrase for certificadoPersonal.key:
+You are about to be asked to enter information that will be incorporated
+into your certificate request.
+What you are about to enter is what is called a Distinguished Name or a DN.
+There are quite a few fields but you can leave some blank
+For some fields there will be a default value,
+If you enter '.', the field will be left blank.
+-----
+Country Name (2 letter code) [AU]:ES
+State or Province Name (full name) [Some-State]:Las-Palmas
+Locality Name (eg, city) []:Arucas
+Organization Name (eg, company) [Internet Widgits Pty Ltd]:Ulpgc
+Organizational Unit Name (eg, section) []:Estudiante
+Common Name (e.g. server FQDN or YOUR name) []:www.javidiazdom.dev
+Email Address []:javier.diaz119@alu.ulpgc.es
+
+Please enter the following 'extra' attributes
+to be sent with your certificate request
+A challenge password []:unacontraseña
+An optional company name []:Ulpgc
+```
+
+La firma del certificado generado se completa ejecutando el siguiente comando
+```bash
+$  openssl x509 -req -days 365 -in certificadoPersonal.csr -CA certificadoRaiz.crt -CAkey certificadoRaiz.key -CAcreateserial -out certificadoPersonal.crt
+```
+
+Para visualizar los detalles del certificado se utiliza
+```bash
+$ openssl x509 -text -noout -in certificadoPersonal.crt 
+Certificate:
+    Data:
+        Version: 1 (0x0)
+        Serial Number:
+            73:b0:89:63:0d:56:25:20:24:14:2c:85:09:78:15:67:b0:a3:12:f7
+        Signature Algorithm: sha256WithRSAEncryption
+        Issuer: C = ES, ST = Las Palmas, L = Las Palmas de G.C., O = AA - Autoridad de practicas FS/ASSI EII-ULPGC, OU = ULPGC-EII, CN = Autoridad de practicas FS/ASSI, emailAddress = ocon@cicei.ulpgc.es
+        Validity
+            Not Before: Mar 31 15:50:15 2020 GMT
+            Not After : Mar 31 15:50:15 2021 GMT
+        Subject: C = ES, ST = Las-Palmas, L = Arucas, O = Ulpgc, OU = Estudiante, CN = www.javidiazdom.dev, emailAddress = javier.diaz119@alu.ulpgc.es
+        Subject Public Key Info:
+            Public Key Algorithm: rsaEncryption
+                RSA Public-Key: (2048 bit)
+                Modulus:
+                    00:a6:70:07:c8:1a:b2:e6:bb:fc:20:13:a7:9a:bc:
+                    5d:9c:84:16:7e:98:fc:50:7e:59:4f:1f:9c:4a:df:
+                    11:66:eb:01:ea:b5:7a:37:63:ac:c7:89:90:7d:b5:
+                    47:ec:9e:c9:80:84:69:8c:db:7b:60:cc:b0:77:ac:
+                    c2:99:65:b4:0b:a5:76:b5:3f:2b:9d:4a:60:77:79:
+                    9f:6c:f6:b5:41:75:44:11:b1:5a:a0:3e:3a:aa:8b:
+                    b2:dc:12:6e:a1:84:94:27:27:b3:14:ef:7a:f9:b2:
+                    d0:16:bb:6c:c1:64:bb:36:aa:4c:c0:a1:42:ba:2b:
+                    ac:8b:f9:24:27:4d:45:36:11:9b:e8:67:35:dd:8b:
+                    61:30:c9:9c:32:9f:8d:67:18:f2:40:f9:d0:48:82:
+                    ed:4c:f4:c6:c6:76:03:3d:2c:dd:64:7b:4d:20:bc:
+                    f7:57:03:7a:62:f7:08:6c:0c:7e:ce:fd:52:57:60:
+                    9f:8f:c5:8b:cb:92:eb:e6:51:4b:a9:06:d7:fb:96:
+                    fd:15:e2:28:7a:15:0e:02:0d:79:3a:59:56:44:ac:
+                    6e:72:1b:69:f8:70:d5:a2:37:7f:b9:9c:64:c9:c0:
+                    41:dd:3c:30:f5:bc:a8:f5:c6:8a:b0:8b:9a:68:da:
+                    8d:7e:b9:4b:c5:89:3a:ec:14:49:c4:b8:64:09:d5:
+                    e3:63
+                Exponent: 65537 (0x10001)
+    Signature Algorithm: sha256WithRSAEncryption
+         be:39:22:cc:0b:38:e4:34:2b:de:20:09:65:61:0e:bc:6a:6e:
+         42:a7:83:e4:93:36:74:d1:4c:f7:51:0b:c7:a6:59:e6:b6:e4:
+         93:8b:d4:72:f6:19:c5:15:5b:c1:f5:0a:22:9b:27:d6:89:2a:
+         43:5a:08:bf:da:cf:16:15:27:4e:b0:64:4f:2b:a2:11:a4:6b:
+         cf:93:e2:e0:00:d8:26:d5:1c:64:f1:82:1b:a0:6a:ad:91:f8:
+         78:e6:08:f1:a7:dd:c5:14:3f:1f:32:ea:89:df:dd:e2:96:87:
+         4a:35:de:d2:eb:fb:23:c4:91:ce:81:96:27:0c:39:11:ca:89:
+         12:48:8c:2d:4b:cf:ec:bf:b1:49:0f:ea:b9:e0:eb:78:ad:56:
+         32:be:d0:00:3e:b8:1c:a2:03:98:28:4b:2a:a7:2b:b5:23:c3:
+         23:e0:57:af:f6:fc:d1:72:76:7d:fa:9a:54:ac:ae:af:11:83:
+         ad:57:15:6a:f3:14:18:0b:0a:76:66:21:ec:1c:fc:88:fa:1e:
+         fd:e3:8d:4a:8f:c8:06:98:18:a9:61:19:51:dc:cf:a6:a1:fb:
+         be:16:e9:42:62:bb:7c:07:b9:0f:30:ca:33:36:10:13:75:0f:
+         b1:68:0e:21:8b:72:23:17:f2:c1:bb:0f:5f:47:bb:43:59:fb:
+         a6:ce:5b:b8
+```
+
+Lo siguiente es obtener el fichero PKCS#12 con la parte pública y privada del certificado personal generado anteriormente.
+
+```bash
+$ openssl pkcs12 -export -in certificadoPersonal.crt -inkey certificadoPersonal.key -out certificadoPersonal.p12
+```
+
+### Instalación de los certificados en el cliente de correo e intercambio de certificados y correo firmado y cifrado con otro compañero
+
+Con el certificado generado en el apartado anterior, concretamente con su exportación en formato PKCS12, se podrá configurar el cliente de correo electrónico *Mozilla thunderbird*. Después de configurar el cliente con el correo personal (javidiazdom@gmail.com) e importar tanto el certificado raíz como el certificado personal, se configura la 
+cuenta de correo para que utilize el certificado personal.
+
+Se realiza el intercambio de correos con mi compañero (nestorperezharo9@gmail.com) para obtener las claves públicas respetivas mediante mensajes firmados pero no cifrados, con el certificado adjunto en formato `.p12`.
+
+Una vez instalados los certificados en ambas máquinas, se pueden intercambiar mensajes cifrados y firmados
+
+
+![Mensaje enviado a mi compañero](Captura&#32;de&#32;pantalla&#32;de&#32;2020-04-01&#32;16-06-56.png)
+![Mensaje enviado por mi compañero](Captura&#32;de&#32;pantalla&#32;de&#32;2020-04-01&#32;16-08-16.png)
+
+Además, el propio cliente de correo nos muestra la información de los certificados empleados
+
+![Certificado de mi compañero](certificado1.png)
+![Mi certificado](certificado2.png)
+
+### Decodificación con la utilidad "openssl smime" del mensaje cifrado y firmado del compañero
+
+Lo primero es convertir `certificado.p12` a formato PEM mediante la instrucción
+```bash
+$ openssl pkcs12 -in certificadoPersonal.p12 -out certificadoPersonal.pem
+```
+
+Se obtiene el mensaje en formato `.eml`. Se comprueba que el contenido está cifrado, para posteriormente pasar al descifrado mediante la operación
+
+```bash
+$ openssl smime -decrypt -in mensaje.eml -recip certificadoPersonal.pem -out mensaje.txt
+```
+
+y se comprueba que el contenido del mensaje obtenido por este método es el mismo que el mostrado en el cliente de correo
+
+![Mensaje desencriptado](mensajedescifrado.png)
+
+Finalmente verificamos la identidad del emisor haciendo uso del certificado raíz
+
+![Mensaje verificado](mensajeverificado.png)
+
+## Configuración de un servidor web seguro utilizando un certificado autofirmado, con privilegios de asministrador en un servidor web Apache.
+
+Configurar apache para mostrar una página web a través del protocolo https con un certificado autofirmado es bastante simple. Partiendo de una máquina ubuntu 19.10 con apache previamente instalado, los pasos a seguir son los siguientes:
+
+1. Crear tanto el certificado autofirmado como la clave privada. Para generar la clave
+```bash
+$ openssl genpkey -algorithm RSA -aes256 -out certificadoServidor.key -pkeyopt rsa_keygen_bits:2048
+```
+y para el certificado
+```bash
+$ openssl req -new -key certificadoServidor.key -out certificadoServidor.csr
+$ openssl x509 -req -days 365 -in certificadoServidor.csr -signkey certificadoServidor.key -out certificadoServidor.crt
+```
+
+2. Definir el host `www.ejemplo.com` en el archivo `/etc/hosts`.
+
+```
+127.0.0.1	localhost
+::1		localhost
+127.0.1.1	pop-os.localdomain	pop-os
+127.0.1.1	www.ejemplo.com
+```
+
+3. Configuración de apache: 
+
+Cargar el módulo ssl
+
+```bash
+$ a2enmod ssl
+```
+
+Crear el archivo que define el host virtual que escucha en el puerto https (443)
+
+```bash
+$ touch /etc/apache2/sites-available/fs-ssl.conf
+```
+
+En este fichero se debe introducir lo siguiente
+```bash
+<VirtualHost 127.0.1.1:443>
+    DocumentRoot /var/www/fs
+    ServerName www.ejemplo.com
+    SSLEngine on
+    SSLCertificateFile "/home/javidiazdom/Documentos/Practica FS/apache/certificadoServidor.crt"
+    SSLCertificateKeyFile "/home/javidiazdom/Documentos/Practica FS/apache/certificadoServidor.key"
+</VirtualHost>
+```
+
+Crear el contenido de la página y el directorio donde se aloja
+
+```bash
+$ mkdir /var/www/fs
+$ touch /var/www/fs/index.html
+```
+
+En `index.html` se podrá introducir cualquier estructura html. En mi caso he introducido
+
+```html
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <title>Ejemplo</title>
+  </head>
+  <body>
+	<h1> EJEMPLO </h1>  
+  </body>
+</html>
+
+```
+
+Habilitar la página y recargar apache para aplicar los cambios
+```bash
+$ a2ensite fs-ssl
+$ systemctl reload apache2
+```
+
+Con esto ya está completada la configuración, apache mostrará el contenido de `index.html` cuando se acceda a `www.ejemplo.com` a través del protocolo https. 
+
+Esto se comprueba accediendo a `https://www.ejemplo.com` a través del navegador.
+![](Captura&#32;de&#32;pantalla&#32;de&#32;2020-04-01&#32;14-44-10.png)
+
+En efecto, muestra el contenido de `/var/www/fs/index.html`. Además, si se accede a la información de seguridad, se aprecia el protocolo utilizado, TLS 1.3, además del cifrado obtenido AES_128_GCM.
+![](Captura&#32;de&#32;pantalla&#32;de&#32;2020-04-01&#32;14-47-40.png)
+También se detalla información acerca del certificado utilizado, y se puede ampliar esa información para ver todos los detalles del certificado.
+![](Captura&#32;de&#32;pantalla&#32;de&#32;2020-04-01&#32;14-47-21.png)
+
+## Bibliografía
+
+Gran parte de la información para el desarrollo de la práctica ha sido obtenida de la página proporcionada en el campus de la asignatura [How to openssl](https://openssl.cicei.com/index.php?title=P%C3%A1gina_principal#Certificado_Ra.C3.ADz_Autofirmado). 
+Además de esta web, se han utilzado otras webs para puntualizaciones y consultas específicas, así como para la última parte de la práctica.
+
+- [Openssl manual oficial](https://www.openssl.org/docs/man1.1.1/man1/)
+- [Wikipedia](https://www.wikipedia.org)
+- [Stack overflow](https://stackoverflow.com/)
+- [Digicert](https://www.digicert.com/kb/csr-ssl-installation/apache-openssl.htm)
+- [Liquid Web](https://www.liquidweb.com/kb/configure-apache-virtual-hosts-ubuntu-18-04/)
