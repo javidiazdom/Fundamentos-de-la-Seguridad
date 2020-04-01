@@ -1,14 +1,18 @@
-# Practica 1 Fundamentos de la Seguridad
+<img src="/home/javidiazdom/Documentos/Practica FS/Frame 1.jpg" style="zoom:150%;" />
 
-#### Javier Díaz Domínguez
+<div style="page-break-after: always;"></div>
+## Índice
+[TOC]
 
-#### 2019-2020
+<div style="page-break-after: always;"></div>
 
-## Cifrado simétrico de documentos.
+## Utilización de OpenSSL (Cifrado simétrico, resúmenes, claves asimétricas, firma y cifrado asimétrico)
+
+### Cifrado simétrico de documentos.
 
 En este apartado de la práctica se realizarán cifrados de documentos de texto empleando diferentes algoritmos de cifrado simétrico. Para ello se empleará la herramienta openssl, concretamente para este apartado el comando `enc` con sus diferentes variantes de modo de operación.
 
-### Comando `enc`
+#### Comando `enc`
 
 Este comando sirve para hacer cifrados simétricos. Para ello utiliza diferentes algoritmos de cifrado, tanto de bloque como de flujo, utilizando contraseñas proporcionadas por el usuario como claves.
 
@@ -25,7 +29,7 @@ Entre sus opciones más importantes podemos encontrar las opciones de gestión d
 * __RC4__: Cifrado de flujo, hoy en día se considera débil. Utiliza dos algoritmos para el cifrado: KSA y PRGA.
 * __Chacha20__: Sistema de cifrado de flujo que soporta claves de 128 y 256 bits. Está basado en una función pseudoaleatoria basada en operaciones add-rotate-xor.
 
-### Creación del fichero de texto.
+#### Creación del fichero de texto.
 
 Para la demostración práctica del funcionamiento de estos algoritmos, se crea un fichero de texto con el siguiente contenido
 
@@ -33,7 +37,7 @@ Para la demostración práctica del funcionamiento de estos algoritmos, se crea 
 Hola, esto es un fichero de prueba para el cifrado mediante 5 algoritmos
 distintos. Utilizaremos los algoritmos AES y TDES obligatoriamente, y posteriormente un algoritmo de flujo. Los demás serán de libre elección. Para esta práctica concretamente se seleccionan los siguientes algoritmos: aes128, des3, rc4, cbc, chacha20.
 ```
-### Cifrado y descifrado
+#### Cifrado y descifrado
 
 Se procede al cifrado utilizando los 5 algoritmos simétricos:
 
@@ -73,7 +77,7 @@ openssl enc -des-cbc -d -in des-cbc-small-text.cif -out des-cbc-small-text.txt
 openssl enc -chacha20 -d -in chacha20-small-text.cif -out chacha20-small-text.txt
 ```
 
-### Tamaño de los archivos cifrados
+#### Tamaño de los archivos cifrados
 
 A continuación se vuelcan por pantalla los diferentes tamaños de los archivos cifrados con los distintos algoritmos.
 ``` bash
@@ -92,7 +96,7 @@ Los tamaños de los ficheros comprimidos con los cifradores de bloque también t
 * Para `des3` ocurre lo mismo que con `aes-128`, y el padding coincide ya que el número más cercano de 345 múltiplo de 8 (que es el tamaño de bloque de `des3` en bytes) coincide con el de 16.
 * `des-cbc` comparte tamaño de bloque con `des3` por lo que la situación es la misma.
 
-### Contenido de los ficheros encriptados
+#### Contenido de los ficheros encriptados
 
 * Fichero original
 
@@ -136,13 +140,15 @@ Salted__qh��ٗ
 6�.f%@&�{�����@k����MŞ
 ```
 
-### Gestión de contraseñas
+#### Gestión de contraseñas
 
->PKCS (Public Key Cryptography Standard) es un grupo de **estándares** de utilización de técnicas criptográficas en la gestión de claves públicas en algoritmos criptográficos. Concretamente openssl nos permite utilizar `pbkdf1` y `pbkdf2`, que son implementaciones de PKCS. La principal diferencia entre ambos es que `pbkdf1` no es capaz de generar claves de más de 160 bits, mientras que `pbkdf2` lo hace de 128, 256 y 512 bits.
+>  PKCS (Public Key Cryptography Standard) es un grupo de **estándares** de utilización de técnicas criptográficas en la gestión de claves públicas en algoritmos criptográficos.
 
->El algoritmo funciona aplicando una función pseudoaleatoria (HMAC con una función hash aprobada) a la contraseña de entrada junto con un valor de sal, repitiendo este proceso muchas veces (mínimo 1000 iteraciones) produciendo una clave derivada. Ésta se puede utilizar como una clave criptográfica en operaciones posteriores. También se puede utilizar la salida de este algoritmo para rellenar el vector de inicialización. El uso de la sal en la gestión de la contraseña permite que para una misma contraseña se generen diferentes claves criptográficas.
+Concretamente openssl nos permite utilizar `pbkdf1` y `pbkdf2`, que son implementaciones de PKCS. La principal diferencia entre ambos es que `pbkdf1` no es capaz de generar claves de más de 160 bits, mientras que `pbkdf2` lo hace de 128, 256 y 512 bits.
 
-### Descifrado de un fichero con clave, vector y sal.
+El algoritmo funciona aplicando una función pseudoaleatoria (HMAC con una función hash aprobada) a la contraseña de entrada junto con un valor de sal, repitiendo este proceso muchas veces (mínimo 1000 iteraciones) produciendo una clave derivada. Ésta se puede utilizar como una clave criptográfica en operaciones posteriores. También se puede utilizar la salida de este algoritmo para rellenar el vector de inicialización. El uso de la sal en la gestión de la contraseña permite que para una misma contraseña se generen diferentes claves criptográficas.
+
+#### Descifrado de un fichero con clave, vector y sal.
 
 Se propone la demostración de que un fichero puede ser descifrado con la clave criptográfica, el vector de inicialización y la sal, sin el conocimiento de la contraseña.
 
@@ -178,42 +184,48 @@ distintos. Utilizaremos los algoritmos AES y TDES obligatoriamente, y posteriorm
 algoritmo de flujo. Los demás serán de libre elección. Para esta práctica concretamente se seleccionan los siguientes algoritmos: aes128, des3, rc4, cbc, chacha20.
 ```
 
-### Demostración de la peligrosidad del modo de operación ecb
+#### Demostración de la peligrosidad del modo de operación ecb
 
 Para ello utilizaremos la siguiente imagen
 
-![ulpgc.png](ulpgc-pgm.png)
+![ulpgc.png](images/ulpgc-pgm.png)
 
 Se procede eliminando las cabeceras para la encriptación
 
-```
+```bash
 $ head -n 3 ulpgc.pgm > header.txt
 ```
 
 se extrae el cuerpo de la imagen
-```
+```bash
 $ tail -n +4 ulpgc.pgm > body.bin
 ```
 
 se cifra el cuerpo de la imagen
-```
+```bash
 $ openssl enc -aes-128-ecb -nosalt -k prueba -in body.bin -out body.cif
 ```
 
 por último, se juntan las cabeceras y el cuerpo cifrado
-```
+```bash
 $ cat header.txt body.cif > ulpgc-ecb.pgm
 ```
 
 y se obtiene la siguiente imagen
 
-![ulpgc-ecb.png](ulpgc-ecb.png)
+![ulpgc-ecb.png](images/ulpgc-ecb.png)
 
 que efectivamente prueba la peligrosidad del modo de operación ecb, ya que deja ver patrones similares a los de la foto original. En contrapunto, si utilizaramos otro modo de encriptación como cbc, el resultado sería el siguiente
 
-![ulpgc-cbc.png](ulpgc-cbc.png)
+![ulpgc-cbc.png](images/ulpgc-cbc.png)
 
-## Cifrado y comprobación de resúmenes: Generación de claves asimétricas (pública-privada) y firmado de resúmenes
+que es claramente mucho más aleatorio y por lo tanto mejor.
+
+<div style="page-break-after: always;"></div>
+
+
+
+### Generación y comprobación de resúmenes: Generación de claves asimétricas (pública-privada) y firmado de resúmenes
 
 Openssl ofrece la posibilidad de generar resúmenes de archivos con diferentes algoritmos de resumen mediante la opción `dgst`. Haciendo uso de esta herramienta, se generan varios resúmenes utilizando los siguientes algoritmos
 
@@ -251,7 +263,7 @@ $ openssl dgst -sha384 small-text.txt
 SHA384(small-text.txt)= a7e82cb8640ccd70e455d5285fa89ea67be185f5a7f1111f59d1be99d817927551208fa548ad8e1e6bcd7a7efd926ae9
 ```
 
-### Generación de un par de claves asimétricas RSA de 2048 bits.
+#### Generación de un par de claves asimétricas RSA de 2048 bits.
 
 Se genera la clave privada
 
@@ -313,7 +325,7 @@ F1ucrIKs8czJ8jdmFEdyf36AVwp6PgQ+ZvYS202wlT5T2RdlXbhGDphE1YJm9G1a
 -----END PUBLIC KEY-----
 ```
 
-### Exportación del par de claves en formatos DER Y PEM
+#### Exportación del par de claves en formatos DER Y PEM
 
 Para seleccionar el formato de exportación de las claves se utiliza la opción `-outform DER | PEM` del comando `openssl genpkey`. Los comandos de generación de claves quedarían así para el formato DER
 
@@ -338,7 +350,7 @@ $ openssl pkey -in privateRSA.der -inform DER -outform PEM -out privateRSA.pem
 
 Lo mismo se aplica para la conversión de la clave pública.
 
-### Firma y comprobación de la firma
+#### Firma y comprobación de la firma
 
 En primer lugar se crea el fichero `mensaje.txt` que contiene `Esto es un mensaje`, y se crea el resumen firmado con la clave privada que contiene el fichero `privateRSA_1.pem` (que es el fichero creado anteriormente).
 
@@ -352,7 +364,7 @@ y se verifica que el resumen es correcto con la siguiente instrucción
 $ openssl dgst -sha256 -verify publicRSA_1.pem -signature resumen_firmado.sha mensaje.txt
 ```
 
-### Creación dos claves DH y demostración de la equivalencia entre combinaciones.
+#### Creación dos claves DH y demostración de la equivalencia entre combinaciones.
 
 Se generan los pares de claves
 
@@ -375,22 +387,25 @@ Se comprueba que, efectivamente, los valores generados son equivalentes
 $ cmp secret1 secret2
 ```
 
-## Cifrado asimétrico de documentos
+### Cifrado asimétrico de documentos
 
 En esta parte de la práctica se pide cifrar un documento de texto y enviarlo a un compañero junto con la clave cifrada con su clave pública RSA. 
-Para cumplir la especificación, se crea el fichero de texto `mensaje.txt` y se cifra utilizando `aes-256`.
+Para cumplir la especificación, se siguen los siguientes pasos
+
+1. Crear el fichero de texto `mensaje.txt` y cifrar utilizando `aes-256`.
 
 ```bash
 $ openssl enc -aes-256-cfb -in mensaje.txt -out mensaje.aes-256-cfb
 ```
 
-El siguiente paso es cifrar la contraseña con la clave pública de mi compañero (Néstor Pérez Haro)
+2. Cifrar la contraseña con la clave pública de mi compañero (Néstor Pérez Haro)
 
-```
+```bash
 $ openssl pkeyutl -pubin -encrypt -in contraseña -out contraseña.cif -inkey clavepublicanes.pem
 ```
 
-y por último firmar el resumen del archivo de texto con mi clave privada
+3. Firmar el resumen del archivo de texto con mi clave privada
+
 ```bash
 $ openssl dgst -sha256 -sign myprivatekey.pem -out resumen-mensaje-firmado.sha256 mensaje.txt
 ```
@@ -401,7 +416,7 @@ Así mismo, los archivos que he obtenido del intercambio de mensajes son los sig
 
 - `archivoaes-nes`, cifrado mediante aes-256-cbc
 
-- `contra-nes.cif`, que es la contraseña del cifrado simétrico del arhivo anteriorç
+- `contra-nes.cif`, que es la contraseña del cifrado simétrico del arhivo anterior
   
 - `firmanes.rsa`, que es el resumen firmado del documento cifrado.
 
@@ -412,16 +427,18 @@ Con estos datos es posible lo siguiente
     ```bash
     $ openssl pkeyutl -decrypt -in contra-nes.cif -out contra-nes.txt -inkey myprivatekey.pem
     ```
-  * Luego de esto, se utiliza la contraseña obtenida para descifrar el archivo `archivoaes`
+  * Utilizar la contraseña obtenida para descifrar el archivo `archivoaes`
     ```bash
     $ openssl enc -aes-256-cbc -d -in archivoaes-nes -out mensaje-nestor.txt -kfile contra-nes.txt
     ```
-  * Por último debemos verificar la autenticidad del emisor con su firma
+  * Y finalemente verificar la autenticidad del emisor con su firma
     ```
     $ openssl dgst -md5 -verify clavepublicanes.pem -signature firmanes.rsa mensaje.txt
     ```
 
 ## Envío, recepción y decodificación manual de mensajes S/MIME firmados y cifrados, empleando certificados creados por el estudiante y firmados con el certificado raíz de prácticas de la asignatura.
+
+### Creación y firmado del certificado X.509 con el certificado de autoridad de la asignatura
 
 Para empezar se crea la clave privada personal. Esta clave se utilizará para crear el certificado personal posteriormente. Como clave utilizamos `unacontraseña`.
 
@@ -530,29 +547,29 @@ Se realiza el intercambio de correos con mi compañero (nestorperezharo9@gmail.c
 
 Una vez instalados los certificados en ambas máquinas, se pueden intercambiar mensajes cifrados y firmados
 
-
-![Mensaje enviado a mi compañero](Captura&#32;de&#32;pantalla&#32;de&#32;2020-04-01&#32;16-06-56.png)
-![Mensaje enviado por mi compañero](Captura&#32;de&#32;pantalla&#32;de&#32;2020-04-01&#32;16-08-16.png)
+<img src="/home/javidiazdom/Documentos/Practica FS/Captura de pantalla de 2020-04-01 16-06-56.png" alt="Mensaje enviado a mi compañero" style="zoom: 33%;" />
+<img src="/home/javidiazdom/Documentos/Practica FS/Captura de pantalla de 2020-04-01 16-08-16.png" alt="Mensaje enviado por mi compañero" style="zoom:33%;" />
 
 Además, el propio cliente de correo nos muestra la información de los certificados empleados
 
-![Certificado de mi compañero](certificado1.png)
-![Mi certificado](certificado2.png)
+<img src="certificado1.png" alt="Certificado de mi compañero" style="zoom:33%;" />
+
+<img src="certificado2.png" alt="Mi certificado" style="zoom:33%;" />
 
 ### Decodificación con la utilidad "openssl smime" del mensaje cifrado y firmado del compañero
 
-Lo primero es convertir `certificado.p12` a formato PEM mediante la instrucción
+Para poder utilizar el certificado con la utilidad smime se debe convertir `certificado.p12` a formato PEM mediante la instrucción
 ```bash
 $ openssl pkcs12 -in certificadoPersonal.p12 -out certificadoPersonal.pem
 ```
 
-Se obtiene el mensaje en formato `.eml`. Se comprueba que el contenido está cifrado, para posteriormente pasar al descifrado mediante la operación
+Se obtiene el mensaje en formato `.eml` desde el cliente de correo Thunderbird. Se comprueba que el contenido está cifrado con un `cat mensaje.eml`, para posteriormente pasar al descifrado mediante la operación
 
 ```bash
 $ openssl smime -decrypt -in mensaje.eml -recip certificadoPersonal.pem -out mensaje.txt
 ```
 
-y se comprueba que el contenido del mensaje obtenido por este método es el mismo que el mostrado en el cliente de correo
+Se comprueba que el contenido del mensaje obtenido por este método es el mismo que el mostrado en el cliente de correo
 
 ![Mensaje desencriptado](mensajedescifrado.png)
 
@@ -564,7 +581,10 @@ Finalmente verificamos la identidad del emisor haciendo uso del certificado raí
 
 Configurar apache para mostrar una página web a través del protocolo https con un certificado autofirmado es bastante simple. Partiendo de una máquina ubuntu 19.10 con apache previamente instalado, los pasos a seguir son los siguientes:
 
-1. Crear tanto el certificado autofirmado como la clave privada. Para generar la clave
+### Creación del certificado autofirmado y la clave privada. 
+
+Para generar la clave, como ya hemos realizado en apartados anteriores
+
 ```bash
 $ openssl genpkey -algorithm RSA -aes256 -out certificadoServidor.key -pkeyopt rsa_keygen_bits:2048
 ```
@@ -574,7 +594,9 @@ $ openssl req -new -key certificadoServidor.key -out certificadoServidor.csr
 $ openssl x509 -req -days 365 -in certificadoServidor.csr -signkey certificadoServidor.key -out certificadoServidor.crt
 ```
 
-2. Definir el host `www.ejemplo.com` en el archivo `/etc/hosts`.
+### Definición del host 
+
+Para ello debemos de introducir la definición de `www.ejemplo.com` en el archivo `/etc/hosts`.
 
 ```
 127.0.0.1	localhost
@@ -583,21 +605,24 @@ $ openssl x509 -req -days 365 -in certificadoServidor.csr -signkey certificadoSe
 127.0.1.1	www.ejemplo.com
 ```
 
-3. Configuración de apache: 
+> Esto permitirá que cuando se acceda desde el navegador de la máquina a la dirección `https://www.ejemplo.com`, realmente se está accediendo a la máquina 127.0.1.1:443, es decir, a la máquina propia (la 1 dentro de la interfaz local)  y al puerto 443 de dicha máquina, que es el de `https`.
 
-Cargar el módulo ssl
+### Configuración de apache
+
+1. Se debe de cargar el módulo ssl para permitir que apache pueda operar con los certificados.
 
 ```bash
 $ a2enmod ssl
 ```
 
-Crear el archivo que define el host virtual que escucha en el puerto https (443)
+2. Crear el archivo que define el host virtual que escucha en el puerto https (443)
 
 ```bash
 $ touch /etc/apache2/sites-available/fs-ssl.conf
 ```
 
-En este fichero se debe introducir lo siguiente
+3. En este fichero se debe introducir lo siguiente
+
 ```bash
 <VirtualHost 127.0.1.1:443>
     DocumentRoot /var/www/fs
@@ -608,7 +633,9 @@ En este fichero se debe introducir lo siguiente
 </VirtualHost>
 ```
 
-Crear el contenido de la página y el directorio donde se aloja
+### Contenido de la página 
+
+Para crear el contenido de la página se debe de crear el directorio donde se aloja la página y el archivo `index.html` 
 
 ```bash
 $ mkdir /var/www/fs
@@ -628,10 +655,12 @@ En `index.html` se podrá introducir cualquier estructura html. En mi caso he in
 	<h1> EJEMPLO </h1>  
   </body>
 </html>
-
 ```
 
-Habilitar la página y recargar apache para aplicar los cambios
+### Habilitar la página y recargar apache 
+
+Para aplicar los cambios en la configuración, se deberá de recargar el servicio apache.
+
 ```bash
 $ a2ensite fs-ssl
 $ systemctl reload apache2
@@ -639,13 +668,27 @@ $ systemctl reload apache2
 
 Con esto ya está completada la configuración, apache mostrará el contenido de `index.html` cuando se acceda a `www.ejemplo.com` a través del protocolo https. 
 
-Esto se comprueba accediendo a `https://www.ejemplo.com` a través del navegador.
-![](Captura&#32;de&#32;pantalla&#32;de&#32;2020-04-01&#32;14-44-10.png)
+### Comprobación
 
-En efecto, muestra el contenido de `/var/www/fs/index.html`. Además, si se accede a la información de seguridad, se aprecia el protocolo utilizado, TLS 1.3, además del cifrado obtenido AES_128_GCM.
-![](Captura&#32;de&#32;pantalla&#32;de&#32;2020-04-01&#32;14-47-40.png)
+Esto se comprueba accediendo a `https://www.ejemplo.com` a través del navegador.
+![Navegador](/home/javidiazdom/Documentos/Practica FS/Captura de pantalla de 2020-04-01 14-44-10.png)
+
+En efecto, muestra el contenido de `/var/www/fs/index.html`. Además, si se accede a la información de seguridad, se aprecia el protocolo utilizado, TLS 1.3, además del cifrado obtenido (AES_128_GCM).
+
+
+<img src="/home/javidiazdom/Documentos/Practica FS/Captura de pantalla de 2020-04-01 14-47-40.png" style="zoom: 25%;" />
+
+
+
 También se detalla información acerca del certificado utilizado, y se puede ampliar esa información para ver todos los detalles del certificado.
-![](Captura&#32;de&#32;pantalla&#32;de&#32;2020-04-01&#32;14-47-21.png)
+
+
+
+<img src="/home/javidiazdom/Documentos/Practica FS/Captura de pantalla de 2020-04-01 14-47-21.png" style="zoom:33%;" />
+
+
+
+<div style="page-break-after: always;"></div>
 
 ## Bibliografía
 
